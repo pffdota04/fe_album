@@ -1,0 +1,12 @@
+.login_background {
+  background: linear-gradient(rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.7)),
+    url("./../../assets/images/Office Branding Mockup.jpg");
+  height: calc(100vh - 54px);
+  /* min-height: 300px; */
+  width: 100%;
+  overflow-y: hidden;
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+}
