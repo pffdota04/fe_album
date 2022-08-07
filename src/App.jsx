@@ -7,11 +7,12 @@ import Header from "./components/Header";
 import UserPage from "./pages/UserPage";
 import ScanPage from "./pages/ScanPage";
 import Register from "./pages/Register";
-import axios from "axios";
 
 import userContext from "./context/userContext";
 import { useContext, useEffect, useState } from "react";
 import Album from "./pages/Album";
+import Image from "./pages/Image";
+import { get } from "./axiosCall";
 function App() {
   const userData = useContext(userContext);
   const [checkToken, setCheckToken] = useState(null);
@@ -23,17 +24,11 @@ function App() {
 
   const fetchData = async (token) => {
     try {
-      if (token) {
-        const respon = await axios.get(
-          "http://localhost:5000/user/getUserByToken",
-          {
-            headers: { Authorization: token },
-          }
-        );
-        setCheckToken(true);
-        userData.setState(respon.data);
-        console.log(respon.data);
-      } else throw 0;
+      // if (!token) throw 0;
+      const respon = await get("http://localhost:5000/user/getUserByToken");
+      setCheckToken(true);
+      userData.setState(respon.data);
+      console.log(respon.data);
     } catch (error) {
       if (
         error.response &&
@@ -47,7 +42,7 @@ function App() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
     if (checkToken === false) {
       fetchData(userData.state.token);
     } else if (checkToken === true) {
@@ -66,11 +61,16 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/user" element={<UserPage />} />
                 <Route path="/album/:id" element={<Album />} />
+                <Route path="/image/:id" element={<Image />} />
                 <Route path="/404" element={<ErrorPage error={404} />} />
               </Routes>
             ) : (
               <Routes>
                 <Route path="*" element={<ErrorPage error={404} />} />
+                <Route
+                  path="/image/:id"
+                  element={<ErrorPage error="PLEASE LOGIN" />}
+                />
                 <Route path="/" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/letscan" element={<ScanPage />} />

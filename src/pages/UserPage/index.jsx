@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import userContext from "../../context/userContext";
 import axios from "axios";
 import AlbumItem from "../../components/AlbumItem";
+import { get, post } from "../../axiosCall";
 
 const UserPage = (props) => {
   let navigate = useNavigate();
@@ -14,25 +15,12 @@ const UserPage = (props) => {
 
   useEffect(() => {
     if (userData.state.token) {
-      axios
-        .get("http://localhost:5000/album/", {
-          headers: { Authorization: userData.state.token },
-        })
-        .then((res) => setMyAlbum(res.data));
+      get("http://localhost:5000/album/").then((res) => setMyAlbum(res.data));
     }
   }, [userData]);
 
-
-
   const createAlbum = () => {
-    axios
-      .post(
-        "http://localhost:5000/album/",
-        { name: newName },
-        {
-          headers: { Authorization: userData.state.token },
-        }
-      )
+    post("http://localhost:5000/album/", { name: newName })
       .then((res) => alert(res.data))
       .catch((e) => console.log(e));
   };

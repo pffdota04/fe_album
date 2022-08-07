@@ -3,24 +3,17 @@ import { useEffect, useState } from "react";
 
 const OpenSeaDragonViewer = ({ image }) => {
   const [viewer, setViewer] = useState(null);
-
-  // useEffect(() => {
-  //   if (image && viewer) {
-  //     viewer.open(image.source);
-  //   }
-  // }, [image]);
-
+  useEffect(() => {
+    if (image && viewer) {
+      viewer.open(image.source);
+    }
+  }, [image]);
   const InitOpenseadragon = () => {
     viewer && viewer.destroy();
     setViewer(
       OpenSeaDragon({
         id: "openSeaDragon",
-        zoomInButton: "zoom-in",
-        zoomOutButton: "zoom-out",
-        homeButton: "home",
-        fullPageButton: "full-page",
-        nextButton: "next",
-        previousButton: "previous",
+        prefixUrl: "openseadragon-images/",
         animationTime: 0.5,
         blendTime: 0.1,
         constrainDuringPan: true,
@@ -28,23 +21,10 @@ const OpenSeaDragonViewer = ({ image }) => {
         minZoomLevel: 1,
         visibilityRatio: 1,
         zoomPerScroll: 2,
-        tileSources: {
-          Image: {
-            xmlns: "http://schemas.microsoft.com/deepzoom/2008",
-            Url: "http://localhost:5000/image/getFolderDzi/",
-            Format: "png",
-            Overlap: "2",
-            TileSize: "256",
-            Size: {
-              Height: "2880",
-              Width: "5120",
-            },
-          },
-        },
+        showNavigationControl: false,
       })
     );
   };
-
   useEffect(() => {
     InitOpenseadragon();
     return () => {
@@ -54,6 +34,8 @@ const OpenSeaDragonViewer = ({ image }) => {
 
   return (
     <>
+      {image.source.Image.Size.Height}
+      {image.source.Image.Size.Width}
       Zoom in
       <span id="zoom-in" className=" bg-danger p-3">
         +
@@ -66,8 +48,12 @@ const OpenSeaDragonViewer = ({ image }) => {
         id="openSeaDragon"
         className="mx-auto"
         style={{
-          height: "800px",
-          maxWidth: "1200px",
+          height:
+            image.source.Image.Size.Height /
+              (image.source.Image.Size.Width / 1000) +
+            "px",
+          width: "1000px",
+          maxWidth: "100%",
         }}
       ></div>
     </>

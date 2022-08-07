@@ -3,8 +3,8 @@ import { useContext, useEffect, useState } from "react";
 import "./style.css";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import userContext from "../../context/userContext";
-import axios from "axios";
 import OpenSeaDragonViewer from "./../../components/OpenSeaDragonViewer/OpenSeaViewer";
+import { get, post } from "../../axiosCall";
 // import { parseString } from "xml2js";
 const Album = (props) => {
   let { id } = useParams();
@@ -13,24 +13,20 @@ const Album = (props) => {
   const [myAlbum, setMyAlbum] = useState([]);
   const [onwer, setOnwer] = useState({});
   const [listImages, setListImages] = useState([]);
-
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [nameImage, setNameImage] = useState("");
   useEffect(() => {
     if (userData.state.token) {
-      axios
-        .get("http://localhost:5000/album/" + id, {
-          headers: { Authorization: userData.state.token },
-        })
-        .then((res) => {
-          setMyAlbum(res.data);
-          axios
-            .get("http://localhost:5000/user/byid/" + res.data.uid)
-            .then((res2) => setOnwer(res2.data));
-          axios
-            .get("http://localhost:5000/image/albumid/" + id)
-            .then((res3) => setListImages(res3.data));
-        });
+      get("http://localhost:5000/album/" + id).then((res) => {
+        setMyAlbum(res.data);
+        get("http://localhost:5000/user/byid/" + res.data.uid).then((res2) =>
+          setOnwer(res2.data)
+        );
+        get("http://localhost:5000/image/albumid/" + id).then((res3) =>
+          setListImages(res3.data)
+        );
+      });
     }
-    tileSourceFromData();
   }, [userData]);
 
   function getFormattedDate(date) {
@@ -46,13 +42,22 @@ const Album = (props) => {
     return month + "/" + day + "/" + year;
   }
 
-  var tileSourceFromData = function (data, filesUrl) {
-    axios.get("http://localhost:5000/image?file=output.dzi").then(
-      (res) => console.log(res.data)
-      // parseString(res.data, function (err, result) {
-      //   console.log(result);
-      // })
-    );
+  const handleUpload = async (event) => {
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append("imgs", selectedFile);
+    formData.append("albumId", myAlbum._id);
+    formData.append("name", nameImage);
+    formData.append("createBy", userData.state._id);
+    formData.append("sharedTo", "[]");
+    try {
+      const response = await post(
+        "http://localhost:5000/image/upload",
+        formData
+      );
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -64,18 +69,30 @@ const Album = (props) => {
       <h1>
         Shared to: {myAlbum.length > 0 ? myAlbum.sharedTo.length : 0} people
       </h1>
+      <input
+        type="file"
+        onChange={(event) => setSelectedFile(event.target.files[0])}
+      />
+      <input
+        type="text"
+        placeholder="name of image"
+        onChange={(event) => setNameImage(event.target.value)}
+      />
+      <div className="btn btn-warning" onClick={handleUpload}>
+        UPLOAD
+      </div>
       <hr />
 
       {listImages.length > 0 ? (
         listImages.map((e) => (
-          <div className="d-inline-block m-3">
+          <Link to={"/image/" + e._id} className="d-inline-block m-3">
             <img
               src={
                 "http://localhost:5000/image/getcustom/?format=png&h=100&file=" +
                 e.filename
               }
             />
-          </div>
+          </Link>
         ))
       ) : (
         <p> This album chưa có hình ảnh nào</p>
@@ -94,23 +111,6 @@ const Album = (props) => {
           ),
         }}
       /> */}
-      <div className="container">
-        <OpenSeaDragonViewer
-          image={{
-            source: {
-              xmlns: "http://schemas.microsoft.com/deepzoom/2008",
-              Url: "http://localhost:5000/image/getFolderDzi/",
-              Format: "png",
-              Overlap: "0",
-              TileSize: "512",
-              Size: {
-                Width: "6000",
-                Height: "2906",
-              },
-            },
-          }}
-        ></OpenSeaDragonViewer>
-      </div>
     </div>
   );
 };

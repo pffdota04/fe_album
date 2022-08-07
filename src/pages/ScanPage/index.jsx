@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import EnterCode from "../../components/EnterCode";
 import userContext from "../../context/userContext";
+import { post } from "./../../axiosCall/index";
 
 const ScanPage = () => {
   const { state } = useLocation();
@@ -17,11 +18,10 @@ const ScanPage = () => {
   });
 
   const check = () => {
-    axios
-      .post("http://localhost:5000/user/checkcode", {
-        email: state.email,
-        otpToken: code.join(""),
-      })
+    post("http://localhost:5000/user/checkcode", {
+      email: state.email,
+      otpToken: code.join(""),
+    })
       .then((res) => {
         if (res.data.token) {
           localStorage.setItem("token", res.data.token);
@@ -33,6 +33,22 @@ const ScanPage = () => {
         alert("Đã xảy ra lỗi");
         console.log(e);
       });
+    // axios
+    //   .post("http://localhost:5000/user/checkcode", {
+    //     email: state.email,
+    //     otpToken: code.join(""),
+    //   })
+    //   .then((res) => {
+    //     if (res.data.token) {
+    //       localStorage.setItem("token", res.data.token);
+    //       userData.setState(res.data);
+    //       navigate("/user");
+    //     } else alert("Code Không đúng!");
+    //   })
+    //   .catch((e) => {
+    //     alert("Đã xảy ra lỗi");
+    //     console.log(e);
+    //   });
   };
 
   const getQr = () => {
@@ -53,7 +69,7 @@ const ScanPage = () => {
         <>
           <p>Tài khoảng đã xác thực OPT, mở app của bạn để xem mã!</p>
 
-          <EnterCode setCode={setCode} code={code} />
+          <EnterCode setCode={setCode} code={code}  enter={check} />
           <div className="btn btn-warning mt-2" onClick={() => check()}>
             Check
           </div>
@@ -67,7 +83,8 @@ const ScanPage = () => {
             Hãy quét mã này trên Thiết bị tin cậy của bạn bằng Google
             Authenticator!
           </p>
-          <EnterCode setCode={setCode} code={code} />
+          <EnterCode setCode={setCode} code={code} enter={check} />
+
           <div className="btn btn-warning mt-2" onClick={() => check()}>
             Check
           </div>
