@@ -18,13 +18,12 @@ const ScanPage = () => {
   });
 
   const check = () => {
-    post("http://localhost:5000/user/checkcode", {
+    post("/user/checkcode", {
       email: state.email,
       otpToken: code.join(""),
     })
       .then((res) => {
-        if (res.data.token) {
-          localStorage.setItem("token", res.data.token);
+        if (res.data.check) {
           userData.setState(res.data);
           navigate("/user");
         } else alert("Code Không đúng!");
@@ -33,33 +32,15 @@ const ScanPage = () => {
         alert("Đã xảy ra lỗi");
         console.log(e);
       });
-    // axios
-    //   .post("http://localhost:5000/user/checkcode", {
-    //     email: state.email,
-    //     otpToken: code.join(""),
-    //   })
-    //   .then((res) => {
-    //     if (res.data.token) {
-    //       localStorage.setItem("token", res.data.token);
-    //       userData.setState(res.data);
-    //       navigate("/user");
-    //     } else alert("Code Không đúng!");
-    //   })
-    //   .catch((e) => {
-    //     alert("Đã xảy ra lỗi");
-    //     console.log(e);
-    //   });
   };
 
   const getQr = () => {
-    axios
-      .post("http://localhost:5000/user/createqrcode", {
-        email: state.email,
-      })
-      .then((res) => {
-        setImgQr(res.data);
-        console.log(res.data);
-      });
+    post("/user/createqrcode", {
+      email: state.email,
+    }).then((res) => {
+      setImgQr(res.data);
+      console.log(res.data);
+    });
   };
   return (
     <div className="container text-center">
@@ -69,7 +50,7 @@ const ScanPage = () => {
         <>
           <p>Tài khoảng đã xác thực OPT, mở app của bạn để xem mã!</p>
 
-          <EnterCode setCode={setCode} code={code}  enter={check} />
+          <EnterCode setCode={setCode} code={code} enter={check} />
           <div className="btn btn-warning mt-2" onClick={() => check()}>
             Check
           </div>
@@ -84,7 +65,6 @@ const ScanPage = () => {
             Authenticator!
           </p>
           <EnterCode setCode={setCode} code={code} enter={check} />
-
           <div className="btn btn-warning mt-2" onClick={() => check()}>
             Check
           </div>

@@ -3,39 +3,39 @@ import "./style.css";
 import background from "./../../assets/images/Office Branding Mockup.jpg";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-
-const userLocal = localStorage.getItem("user");
+import { Link, useNavigate } from "react-router-dom";
+import { post } from "../../axiosCall";
 
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [address, setAddress] = useState("");
   const [name, setName] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [qrimg, setQrimg] = useState(null);
 
   let navigate = useNavigate();
+
   const register = () => {
     if (email === "" && password === "") alert("Không được để trống");
     else {
       setLoading(true);
-      axios
-        .post("http://localhost:5000/user", {
-          info: {
-            name: name,
-            address: address,
-            email: email,
-            password: password,
-          },
-        })
+      post("/user", {
+        info: {
+          name: name,
+          address: address,
+          email: email,
+          password: password,
+        },
+      })
         .then((res) => {
-          alert(JSON.stringify(res.data));
-          navigate("/login", { state: res.data });
+          setLoading(false);
+          setQrimg(res.data.qr);
+          // navigate("/login", { state: res.data });
         })
         .catch((e) => {
-          setLoading(true);
+          setLoading(false);
           console.log(e);
-
           alert(e.response.data.message);
         });
     }
@@ -43,7 +43,39 @@ const Register = () => {
 
   return (
     <div className="login_background">
-      {loading ? (
+      {qrimg ? (
+        <div className="text-center text-warning mx-auto bg-secondary p-3">
+          <h3>Xác thực 2 yếu tố</h3>
+          <button
+            className="btn btn-primary m-3  text-warning "
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapseExample"
+            aria-expanded="false"
+            aria-controls="collapseExample"
+          >
+            Xem mã QR
+          </button>
+          <div className="collapse" id="collapseExample">
+            <div className="card card-body">
+              <div dangerouslySetInnerHTML={{ __html: qrimg }} />
+            </div>
+          </div>
+          <h6>Scan mã qr trên thiết bị tin cậy của bạn.</h6>
+          <div className="text-danger bg-light p-1">
+            <p className="m-0">Cảnh báo: Mã QR này chỉ sinh ra 1 lần!</p>
+            <p className="m-0">Hãy scan mã trước khi rời khỏi trang này</p>
+          </div>
+          <Link
+            to="/login"
+            className="text-warning hover-opacity-half text-decoration-underline"
+          >
+            Đến trang đăng nhập
+          </Link>
+        </div>
+      ) : loading ? (
+        <p>Loading</p>
+      ) : (
         <form className="w-50 mx-auto my-auto">
           <div className="mb-3">
             <label
@@ -109,7 +141,7 @@ const Register = () => {
               }}
             />
           </div>
-          <div className="text-center">
+          <div className="text-center mb-2">
             <div
               onClick={() => register()}
               className={"btn btn-warning " + (loading ? "disable" : "")}
@@ -117,9 +149,16 @@ const Register = () => {
               Submit
             </div>
           </div>
+          <div className="text-center text-warning">
+            Đã có tài khoản?{" "}
+            <Link
+              to="/login"
+              className="text-warning hover-opacity-half text-decoration-underline"
+            >
+              Đến trang đăng nhập
+            </Link>
+          </div>
         </form>
-      ) : (
-        <p>Loading</p>
       )}
     </div>
   );

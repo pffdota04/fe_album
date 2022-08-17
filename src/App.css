@@ -2,6 +2,39 @@
   text-align: center;
 }
 
+.main {
+  top: 54px;
+  position: relative;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.opacity-half{
+  opacity: 0.5;
+}
+
+.hover-opacity-half:hover {
+  opacity: 0.5;
+}
+
+.three-dot {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
 /*  */
 /* http://meyerweb.com/eric/tools/css/reset/ 
    v2.0 | 20110126

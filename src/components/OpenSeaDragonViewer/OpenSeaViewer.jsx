@@ -13,15 +13,17 @@ const OpenSeaDragonViewer = ({ image }) => {
     setViewer(
       OpenSeaDragon({
         id: "openSeaDragon",
-        prefixUrl: "openseadragon-images/",
-        animationTime: 0.5,
-        blendTime: 0.1,
+        prefixUrl: "//openseadragon.github.io/openseadragon/images/",
+        animationTime: 1,
+        blendTime: 0.2,
         constrainDuringPan: true,
-        maxZoomPixelRatio: 2,
+        minZoomImageRatio: 1,
+        maxZoomPixelRatio: 5,
         minZoomLevel: 1,
-        visibilityRatio: 1,
+        visibilityRatio: 0,
         zoomPerScroll: 2,
-        showNavigationControl: false,
+        zoomInButton: "zoom-in",
+        zoomOutButton: "zoom-out",
       })
     );
   };
@@ -34,19 +36,24 @@ const OpenSeaDragonViewer = ({ image }) => {
 
   return (
     <>
-      {image.source.Image.Size.Height}
-      {image.source.Image.Size.Width}
-      Zoom in
-      <span id="zoom-in" className=" bg-danger p-3">
-        +
+      ({image.source.Image.Size.Height} x {image.source.Image.Size.Width})
+      <span
+        id="zoom-in"
+        title="Zoom in"
+        className="text-danger cursor-pointer noselect"
+      >
+        Zoom In
       </span>
-      Zoom out
-      <span id="zoom-out" className=" bg-danger p-3">
-        -
+      <span
+        id="zoom-out"
+        title="Zoom out"
+        className="text-danger cursor-pointer noselect"
+      >
+        Zoom out
       </span>
       <div
         id="openSeaDragon"
-        className="mx-auto"
+        className="mx-auto mt-5"
         style={{
           height:
             image.source.Image.Size.Height /
@@ -54,6 +61,7 @@ const OpenSeaDragonViewer = ({ image }) => {
             "px",
           width: "1000px",
           maxWidth: "100%",
+          backgroundColor: "black",
         }}
       ></div>
     </>

@@ -4,12 +4,20 @@ const config = {
   withCredentials: true,
 };
 
-const post = async (path, data) => {
-  return await axios.post(path, data, config);
+const API_PATH = "http://localhost:5000";
+const post = async (path, data = {}) => {
+  return await axios.post(API_PATH + path, data, config);
 };
 
 const get = async (path) => {
-  return await axios.get(path, config);
+  return await axios.get(API_PATH + path, config);
 };
 
-export { post, get };
+const remove = async (path) => {
+  return await axios.delete(API_PATH + path, config);
+};
+const put = async (path, data = {}) => {
+  return await axios.put(API_PATH + path, data, config);
+};
+
+export { post, get, remove, put };

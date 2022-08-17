@@ -1,0 +1,23 @@
+.image-upload-preview img:hover ~ .remove-image-upload-preview,
+.remove-image-upload-preview:hover,
+.on-hover-perview-upload {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.2);
+  top: 0;
+  left: 0;
+}
+
+.remove-image-upload-preview {
+  display: none;
+}
+
+.image-upload-preview {
+  position: relative;
+}
+
+.image-upload-preview span:hover {
+  opacity: 0.5;
+}

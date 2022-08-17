@@ -7,27 +7,29 @@ import Header from "./components/Header";
 import UserPage from "./pages/UserPage";
 import ScanPage from "./pages/ScanPage";
 import Register from "./pages/Register";
+import MyAlbum from "./pages/MyAlbum";
 
 import userContext from "./context/userContext";
 import { useContext, useEffect, useState } from "react";
 import Album from "./pages/Album";
 import Image from "./pages/Image";
 import { get } from "./axiosCall";
+import LandingPage from "./pages/LandingPage";
 function App() {
   const userData = useContext(userContext);
-  const [checkToken, setCheckToken] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    fetchData(token);
+    const email = localStorage.getItem("userAlnum");
+    if (email) setUserEmail(true);
   }, []);
 
-  const fetchData = async (token) => {
+  const fetchData = async () => {
     try {
-      // if (!token) throw 0;
-      const respon = await get("http://localhost:5000/user/getUserByToken");
-      setCheckToken(true);
+      const respon = await get("/user/getUserByToken");
+      setUserEmail(true);
       userData.setState(respon.data);
+      localStorage.setItem("userAlnum", respon.data);
       console.log(respon.data);
     } catch (error) {
       if (
@@ -36,30 +38,31 @@ function App() {
         error.response.data.message.includes("expired")
       )
         alert("Phiên đăng nhập hết hạn");
-      localStorage.removeItem("token");
-      setCheckToken(false);
+      localStorage.removeItem("userAlnum");
+      setUserEmail(false);
     }
   };
 
   useEffect(() => {
-    // const token = localStorage.getItem("token");
-    if (checkToken === false) {
-      fetchData(userData.state.token);
-    } else if (checkToken === true) {
+    if (!userEmail) {
+      fetchData();
     }
+    //  else if (checkToken === true) {
+    // }
   }, [userData.state]);
 
   return (
     <BrowserRouter>
-      <Header checkToken={checkToken} />
+      <Header checkToken={userEmail} />
       <>
-        <main className="main bg-light container">
-          {checkToken !== null &&
-            (checkToken ? (
+        <main className="main container">
+          {userEmail !== null &&
+            (userEmail ? (
               <Routes>
                 <Route path="*" element={<ErrorPage error={404} />} />
-                <Route path="/" element={<HomePage />} />
+                <Route path="/" element={<HomePage userEmail={userData} />} />
                 <Route path="/user" element={<UserPage />} />
+                <Route path="/myalbum" element={<MyAlbum />} />
                 <Route path="/album/:id" element={<Album />} />
                 <Route path="/image/:id" element={<Image />} />
                 <Route path="/404" element={<ErrorPage error={404} />} />
@@ -71,7 +74,7 @@ function App() {
                   path="/image/:id"
                   element={<ErrorPage error="PLEASE LOGIN" />}
                 />
-                <Route path="/" element={<HomePage />} />
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/letscan" element={<ScanPage />} />
                 <Route path="/register" element={<Register />} />{" "}

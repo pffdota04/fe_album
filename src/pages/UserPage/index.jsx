@@ -1,103 +1,117 @@
-// import { Link } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import "./style.css";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import userContext from "../../context/userContext";
 import axios from "axios";
-import AlbumItem from "../../components/AlbumItem";
-import { get, post } from "../../axiosCall";
+import { get, put } from "../../axiosCall";
 
 const UserPage = (props) => {
-  let navigate = useNavigate();
   const userData = useContext(userContext);
-  const [myAlbum, setMyAlbum] = useState([]);
-  const [newName, setNewName] = useState("");
+  const [userAllData, setUserAllData] = useState({});
+  const [newData, setNewData] = useState({
+    name: "",
+    address: "",
+    password: "",
+  });
 
   useEffect(() => {
-    if (userData.state.token) {
-      get("http://localhost:5000/album/").then((res) => setMyAlbum(res.data));
+    if (userData.state) {
+      get("/user").then((res) => {
+        setUserAllData(res.data);
+        setNewData({
+          name: res.data.name,
+          address: res.data.address,
+          password: "",
+        });
+      });
     }
   }, [userData]);
 
-  const createAlbum = () => {
-    post("http://localhost:5000/album/", { name: newName })
-      .then((res) => alert(res.data))
-      .catch((e) => console.log(e));
+  const updateAccount = () => {
+    put("/user", newData).then((res) => alert(res.data));
   };
 
   return (
     <div className="container">
-      <p> IF YOU Sê this line, yuou was Authenticator successed!!</p>
-      <hr />
-      {/* {JSON.stringify(userData.state)} */}
-      <button
-        type="button"
-        className="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#createAlbum"
-      >
-        create album
-      </button>
-
-      <h1>My album:</h1>
-      {myAlbum.length === 0 ? (
-        <h3>Bạn chưa có albu, nào</h3>
-      ) : (
-        <>
-          <div className="row">
-            {myAlbum.map((e) => (
-              <AlbumItem e={e} />
-            ))}
+      <div>
+        <div className="row g-2   align-items-center justify-content-center">
+          <div className="col-auto">
+            <label htmlFor="inputPassword6" className="col-form-label ">
+              Email
+            </label>
           </div>
-        </>
-      )}
-      <div
-        className="modal fade"
-        id="createAlbum"
-        tabindex="-1"
-        aria-labelledby="exampleModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">
-                create album
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              <input
-                class="form-control"
-                type="text"
-                placeholder="Name album"
-                aria-label="default input example"
-                onChange={(e) => setNewName(e.target.value)}
-                value={newName}
-              />
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => createAlbum()}
-                data-bs-dismiss="modal"
-              >
-                Create
-              </button>
-            </div>
+          <div className="col-auto">
+            <input
+              type="email"
+              id="inputPassword6"
+              className="form-control"
+              aria-describedby="passwordHelpInline"
+              value={userAllData.email}
+              disabled
+            />
+          </div>
+        </div>
+        <div className="row g-2   mt-1 align-items-center justify-content-center">
+          <div className="col-auto">
+            <label htmlFor="inputPassword6" className="col-form-label">
+              Name
+            </label>
+          </div>
+          <div className="col-auto">
+            <input
+              value={newData.name}
+              onChange={(e) =>
+                setNewData((prev) => ({ ...prev, name: e.target.value }))
+              }
+              type="text"
+              id="inputPassword6"
+              className="form-control"
+              aria-describedby="passwordHelpInline"
+            />
+          </div>
+        </div>
+        <div className="row g-2   mt-1 align-items-center justify-content-center">
+          <div className="col-auto">
+            <label htmlFor="inputPassword6" className="col-form-label">
+              Address
+            </label>
+          </div>
+          <div className="col-auto">
+            <input
+              value={newData.address}
+              onChange={(e) =>
+                setNewData((prev) => ({ ...prev, address: e.target.value }))
+              }
+              type="text"
+              id="inputPassword6"
+              className="form-control"
+              aria-describedby="passwordHelpInline"
+            />
+          </div>
+        </div>
+        <div className="row g-2   mt-1 align-items-center justify-content-center">
+          <div className="col-auto">
+            <label htmlFor="inputPassword6" className="col-form-label">
+              New Password
+            </label>
+          </div>
+          <div className="col-auto">
+            <input
+              value={newData.password}
+              onChange={(e) =>
+                setNewData((prev) => ({ ...prev, password: e.target.value }))
+              }
+              type="password"
+              id="inputPassword6"
+              className="form-control"
+              aria-describedby="passwordHelpInline"
+              placeholder="Không đổi để trống"
+            />
+          </div>
+        </div>
+        <div className="text-center mt-3">
+          <div className="btn btn-warning " onClick={updateAccount}>
+            UPDATE
           </div>
         </div>
       </div>

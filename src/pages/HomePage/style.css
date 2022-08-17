@@ -1,0 +1,46 @@
+.square-50 {
+  height: 150px;
+  line-height: 150px;
+  padding: 0;
+  margin: 0;
+  /* padding-bottom: 50%; */
+}
+
+.img-mu {
+  background-image: url("./../../assets/images/mu.png");
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px !important;
+  height: 100px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  z-index: -1;
+}
+
+.home-square:hover {
+  opacity: 0.8;
+}
+.home-square div {
+  transition: all 0.3s;
+}
+
+.home-square-1:hover > div {
+  transform: rotate3d(25, -25, 3, 45deg);
+  border: solid 5px red;
+}
+
+.home-square-2:hover > div {
+  transform: rotate3d(25, 25, -2, 45deg);
+  border: solid 5px rgb(17, 21, 255);
+}
+
+.home-square-3:hover > div {
+  transform: rotate3d(25, 25, -2, 45deg);
+  border: solid 5px red;
+}
+
+.home-square-4:hover > div {
+  transform: rotate3d(25, -25, 2, 45deg);
+  border: solid 5px red;
+}

@@ -1,20 +1,17 @@
 import "./style.css";
-import { Link } from "react-router-dom";
-import { useState } from "react";
 
 function EnterCode(props) {
   const { setCode, code, enter } = props;
-  console.log(props);
-  const change = (e, i) => {
-    if (e.target.value >= 0 && e.target.value < 10) {
-      let a = [...code];
-      a[i] = e.target.value;
-      setCode(a);
-    }
-  };
+  const change = (e, i) => {};
 
-  const onEnter = (e) => {
-    console.log(e.keyCode);
+  const onEnter = (e, i) => {
+    if (e.key >= 0 && e.key < 10) {
+      let a = [...code];
+      a[i] = e.key;
+      setCode(a);
+
+      if (i !== 5) document.getElementById("inp" + (i + 1)).focus();
+    }
     if (e.keyCode === 13) enter();
   };
 
@@ -23,12 +20,14 @@ function EnterCode(props) {
       {code.map((el, i) => (
         <input
           type="number"
-          onChange={(e) => change(e, i)}
+          // onChange={(e) => change(e, i)}
           min="0"
           max="9"
           value={el}
-          className="m-1"
-          onKeyDown={(e) => onEnter(e)}
+          id={"inp" + i}
+          className="m-1 input-code"
+          onKeyDown={(e) => onEnter(e, i)}
+          onFocus={(e) => e.target.select()}
         />
       ))}
     </div>
