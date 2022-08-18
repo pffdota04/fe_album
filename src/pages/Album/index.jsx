@@ -98,7 +98,8 @@ const Album = (props) => {
         listURL.push(URL.createObjectURL(selectedMultiFile[i]));
       }
       setImgPreUploads(listURL);
-      setNewNameMulti(new Array(listURL.length).fill(""));
+
+      setNewNameMulti(new Array(listURL.length).fill("")); // ["", ""]
     }
   }, [selectedMultiFile]);
 
@@ -139,9 +140,15 @@ const Album = (props) => {
         encType: "multipart/form-data",
       })
         .then((res) => {
-          setUploadStatus("PROGRESS");
-          setUploadPercentage("Xong!");
-          checkProgress(res.data);
+          if (res.data.status) {
+            setUploadStatus("PROGRESS");
+            setUploadPercentage("Xong!");
+            checkProgress(res.data.key);
+          } else {
+            setUploadStatus("COMPLETE");
+            setUploadPercentage("Error!");
+            alert(res.data.message);
+          }
         })
         .catch((e) => setUploadPercentage("Xong!"));
       fetchAgain();
@@ -248,20 +255,107 @@ const Album = (props) => {
     <>
       {myAlbum !== null ? (
         <div className="container">
-          <h1>Album name: {myAlbum?.name}</h1>
-          <h1>Create by: {onwer?.email}</h1>
-          {/* <h1>{JSON.stringify(myAlbum)}</h1> <Loading /> */}
-          <h1>Total image: {myAlbum?.totalImage}</h1>
-          <h1>Create day: {getFormattedDate(myAlbum?.createDay)}</h1>
-          <h1>
-            Shared to: {myAlbum?.length > 0 ? myAlbum?.sharedTo.length : 0}{" "}
-            people
-          </h1>
-          <input type="text" onChange={search} placeholder="search by name" />
-          <hr />
-          <label className="btn btn-warning" htmlFor="up-multi">
-            UP MUTIPLE
-          </label>
+          <div className="card">
+            <h5 className="card-header">
+              Last update: {getFormattedDate(myAlbum?.lastUpdate)}
+            </h5>
+            <div className="card-body">
+              <h5 className="card-title"> {myAlbum?.name}</h5>
+              <p className="card-text">
+                Create by: {onwer?.email} <br />
+                Total image: {myAlbum?.totalImage} <br />
+                Create day: {getFormattedDate(myAlbum?.createDay)}
+                <br />
+                Shared to: {myAlbum?.length > 0
+                  ? myAlbum?.sharedTo.length
+                  : 0}{" "}
+                people
+              </p>
+              <input
+                type="text"
+                onChange={search}
+                placeholder="search by name"
+              />
+            </div>
+          </div>
+          {myAlbum.uid === userData.state._id && (
+            <div className="card mt-3">
+              <h5 className="card-header">You are owner!</h5>
+              <div className="card-body">
+                <label className="btn btn-warning" htmlFor="up-multi">
+                  Upload Some Picture
+                </label>
+                {selectedMultiFile.length > 0 ? (
+                  <>
+                    <div className="d-flex flex-wrap no-select noselect">
+                      {imgPreUploads.map((e, i) => (
+                        <div className="m-3 " key={i}>
+                          <div className="image-upload-preview text-center pb-3">
+                            <img src={e} height="100" className="" />
+                            {uploadStatus === "PROGRESS" ? (
+                              <div className="on-hover-perview-upload ">
+                                <div className="d-flex justify-content-center h-100 align-items-center">
+                                  {progress[i] ? (
+                                    <span className="text-danger cursor-pointer  display-6 ">
+                                      ✔
+                                    </span>
+                                  ) : progress[i] === false ? (
+                                    <span className="text-danger cursor-pointer  display-6 ">
+                                      ⚠
+                                    </span>
+                                  ) : (
+                                    <div
+                                      className="spinner-border"
+                                      role="status"
+                                    ></div>
+                                  )}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="remove-image-upload-preview ">
+                                <div className="d-flex justify-content-center h-100 align-items-center">
+                                  <span
+                                    className="text-danger cursor-pointer  "
+                                    onClick={() => removeAnUpload(i)}
+                                  >
+                                    ❌
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <input
+                            type="text"
+                            id={"name-upload-" + i}
+                            placeholder="tên ảnh"
+                            onChange={(e) => {
+                              const copyNewName = [...newNameMulti];
+                              copyNewName[i] = e.target.value;
+                              setNewNameMulti(copyNewName);
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    {uploadStatus !== "PROGRESS" && (
+                      <button
+                        className="btn btn-warning"
+                        disabled={newNameMulti.includes("")}
+                        onClick={handleUploadMultiple}
+                        data-bs-toggle="modal"
+                        data-bs-target="#upload-process"
+                      >
+                        UPLOAD
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  ""
+                )}
+              </div>
+            </div>
+          )}
+
           <input
             className="d-none"
             id="up-multi"
@@ -270,82 +364,18 @@ const Album = (props) => {
             multiple
             onChange={(event) => setSelectedMultiFile(event.target.files)}
           />
-          {/* UPLOAD */}
-          {selectedMultiFile.length > 0 ? (
-            <>
-              <div className="d-flex flex-wrap no-select noselect">
-                {imgPreUploads.map((e, i) => (
-                  <div className="m-3 " key={i}>
-                    <div className="image-upload-preview text-center pb-3">
-                      <img src={e} height="100" className="" />
-                      {uploadStatus === "PROGRESS" ? (
-                        <div className="on-hover-perview-upload ">
-                          <div className="d-flex justify-content-center h-100 align-items-center">
-                            {progress[i] ? (
-                              <span className="text-danger cursor-pointer  display-6 ">
-                                ✔
-                              </span>
-                            ) : progress[i] === false ? (
-                              <span className="text-danger cursor-pointer  display-6 ">
-                                ⚠
-                              </span>
-                            ) : (
-                              <div
-                                className="spinner-border"
-                                role="status"
-                              ></div>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="remove-image-upload-preview ">
-                          <div className="d-flex justify-content-center h-100 align-items-center">
-                            <span
-                              className="text-danger cursor-pointer  "
-                              onClick={() => removeAnUpload(i)}
-                            >
-                              ❌
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <input
-                      type="text"
-                      id={"name-upload-" + i}
-                      placeholder="tên ảnh"
-                      onChange={(e) => {
-                        const copyNewName = [...newNameMulti];
-                        copyNewName[i] = e.target.value;
-                        setNewNameMulti(copyNewName);
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-              {uploadStatus !== "PROGRESS" && (
-                <button
-                  className="btn btn-warning"
-                  disabled={newNameMulti.includes("")}
-                  onClick={handleUploadMultiple}
-                  data-bs-toggle="modal"
-                  data-bs-target="#upload-process"
-                >
-                  UPLOAD
-                </button>
-              )}
-            </>
-          ) : (
-            ""
-          )}
-          <hr />
-          {JSON.stringify(nowSelect)}
+
           {/* MAP ITEM */}
           <div className="d-flex flex-wrap justify-content-center">
             {/* {JSON.stringify(listImages)} */}
             {listImages.length > 0 ? (
               listImages.map((e) => (
-                <ImagePreview e={e} key={e._id} setSelect={setNowSelect} />
+                <ImagePreview
+                  e={e}
+                  key={e._id}
+                  setSelect={setNowSelect}
+                  isOwner={myAlbum.uid === userData.state._id}
+                />
               ))
             ) : (
               <p> This album chưa có hình ảnh nào</p>
@@ -361,7 +391,7 @@ const Album = (props) => {
             tabIndex="-1"
             aria-hidden="true"
           >
-            <div className="modal-dialog">
+            <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-body">
                   <h1>{uploadpercen}</h1>
@@ -369,7 +399,8 @@ const Album = (props) => {
                   {/* Progress: {JSON.stringify(progress)} */}
                 </div>
                 <div className="modal-footer">
-                  {uploadpercen === "Xong!" ? (
+                  {(uploadStatus === "PROGRESS" ||
+                  uploadStatus === "COMPLETE" || uploadStatus === "NO" ) ? (
                     <button
                       type="button"
                       className="btn btn-secondary"
@@ -393,7 +424,7 @@ const Album = (props) => {
             tabIndex="-1"
             aria-hidden="true"
           >
-            <div className="modal-dialog">
+            <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title">Delete image</h5>
@@ -432,7 +463,7 @@ const Album = (props) => {
             tabIndex="-1"
             aria-hidden="true"
           >
-            <div className="modal-dialog">
+            <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title">Edit image</h5>
@@ -480,7 +511,7 @@ const Album = (props) => {
             tabIndex="-1"
             aria-hidden="true"
           >
-            <div className="modal-dialog">
+            <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title">

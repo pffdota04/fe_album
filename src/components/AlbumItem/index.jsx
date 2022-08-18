@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-const AlbumItem = ({ e, setSelect }) => {
+const AlbumItem = ({ e, setSelect, controll = false }) => {
   function getFormattedDate(date) {
     date = new Date(date);
     var year = date.getFullYear();
@@ -18,47 +18,60 @@ const AlbumItem = ({ e, setSelect }) => {
     <>
       {" "}
       <div className="col-12 col-sm-6 col-md-4 col-lg-3">
-        <Link
-          to={"/album/" + e._id}
-          className="hover-opacity-half"
-          data-bs-toggle="tooltip"
-          title={e.name}
-        >
-          <div className="album-item p-3 bg-warning rounded rounded-3 ">
-            <div className="name three-dot">{e.name}</div>
-            <div className="name">
-              create day: {getFormattedDate(e.createDay)}
-            </div>
-            <div className="name">Tolal img: {e.totalImage}</div>
-            <div className="name">Share with: {e.sharedTo.length} people</div>
-            <div className="name"></div>
+        <div className="card  ">
+          <div className="card-header bg-warning  ">
+            Last update {getFormattedDate(e.lastUpdate)}
           </div>
-        </Link>
-        <div className="w-100 bg-light d-flex justify-content-evenly">
-          <span
-            className=" noselect cursor-pointer"
-            data-bs-toggle="modal"
-            data-bs-target="#editAlbum"
-            onClick={() => setSelect(e)}
-          >
-            🖊
-          </span>
-          <span
-            className=" noselect cursor-pointer"
-            data-bs-toggle="modal"
-            data-bs-target="#deleteAlbum"
-            onClick={() => setSelect(e)}
-          >
-            🗑
-          </span>
-          <span
-            className=" noselect cursor-pointer"
-            data-bs-toggle="modal"
-            data-bs-target="#shareAlbum"
-            onClick={() => setSelect(e)}
-          >
-            🔗
-          </span>
+          <div className="card-body">
+            <h5 className="card-title">{e.name}</h5>
+            <p className="card-text">
+              Tolal img: {e.totalImage}
+              <br />
+              Share with: {e.sharedTo.length} people
+              <br />
+              Created at: {getFormattedDate(e.createDay)}
+            </p>
+            <Link
+              to={"/album/" + e._id}
+              className="hover-opacity-half btn btn-warning"
+              data-bs-toggle="tooltip"
+              title={e.name}
+            >
+              Xem
+            </Link>
+          </div>
+          <ul className="list-group list-group-flush ">
+            <li className="list-group-item p-0">
+              {controll && (
+                <div className="w-100  d-flex justify-content-evenly bg-warning">
+                  <span
+                    className=" noselect cursor-pointer hover-opacity-half"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editAlbum"
+                    onClick={() => setSelect(e)}
+                  >
+                    🖊
+                  </span>
+                  <span
+                    className=" noselect cursor-pointer hover-opacity-half"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteAlbum"
+                    onClick={() => setSelect(e)}
+                  >
+                    🗑
+                  </span>
+                  <span
+                    className=" noselect cursor-pointer hover-opacity-half"
+                    data-bs-toggle="modal"
+                    data-bs-target="#shareAlbum"
+                    onClick={() => setSelect(e)}
+                  >
+                    🔗
+                  </span>
+                </div>
+              )}
+            </li>
+          </ul>
         </div>
       </div>
     </>

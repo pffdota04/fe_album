@@ -4,6 +4,7 @@ import "./style.css";
 import userContext from "../../context/userContext";
 import AlbumItem from "../../components/AlbumItem";
 import { get, post, put, remove } from "../../axiosCall";
+import Loading from "../../components/Loading";
 
 const MyAlbum = () => {
   const userData = useContext(userContext);
@@ -14,6 +15,7 @@ const MyAlbum = () => {
   const [newNameEdit, setNewNameEdit] = useState("");
   const [shareAlbumTo, setShareAlbumTo] = useState("");
   const [listShared, setListShared] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (userData.state) {
@@ -42,7 +44,7 @@ const MyAlbum = () => {
       else
         setMyAlbum(
           myAlbumOrigin.filter((a) => {
-            return a.name.includes(e.target.value.toLowerCase());
+            return a.name.toLowerCase().includes(e.target.value.toLowerCase());
           })
         );
     }, 1000);
@@ -63,33 +65,43 @@ const MyAlbum = () => {
       .then((res) => {
         setMyAlbum(res.data);
         setMyAlbumOrigin(res.data);
+        setLoading(false);
       })
-      .catch((e) => console.log(e));
+      .catch((e) => {
+        setLoading(false);
+        console.log(e);
+      });
   };
 
   const delteAlbum = () => {
-    // alert('dfasd')
+    setLoading(true);
+
     remove("/album?_id=" + select._id)
       .then(() => fetchAgain())
-      .catch((e) => console.log(e));
+      .catch((e) => {
+        setLoading(false);
+        console.log(e);
+      });
   };
 
   const shareAlbum = () => {
+    setLoading(true);
+
     post("/album/share", {
       _id: select._id,
       email: shareAlbumTo,
     })
-      .then(() => fetchAgain())
-      .catch((e) => console.log(e));
-  };
-
-  const unShareAlbum = () => {
-    post("/album/unshare", {
-      _id: select._id,
-      email: shareAlbumTo,
-    })
-      // .then(() => fetchAgain())
-      .catch((e) => console.log(e));
+      .then((res) => {
+        if (res.data == "ok") fetchAgain();
+        else {
+          setLoading(false);
+          alert(res.data.message);
+        }
+      })
+      .catch((e) => {
+        setLoading(false);
+        console.log(e);
+      });
   };
 
   const getListById = async () => {
@@ -100,36 +112,53 @@ const MyAlbum = () => {
   };
 
   const unshare = (email) => {
+    setLoading(true);
+
     post("/album/unshare", {
       _id: select._id,
       email: email,
     })
-      .then(() => fetchAgain())
-      .catch((e) => console.error(e));
+      .then((res) => {
+        if (res.data == "ok") fetchAgain();
+        else {
+          setLoading(false);
+          alert(res.data.message);
+        }
+      })
+      .catch((e) => {
+        setLoading(false);
+        console.log(e);
+      });
   };
 
   return (
     <div className="container">
       {/* {JSON.stringify(userData.state)} */}
+      {loading && <Loading />}
+      <h1>My album</h1>
       <button
         type="button"
-        className="btn btn-primary"
+        className="btn btn-primary m-1"
         data-bs-toggle="modal"
         data-bs-target="#createAlbum"
       >
         create album
       </button>
-
-      <h1>My album:</h1>
-      <input type="text" onChange={search} placeholder="search by name" />
+      <br />
+      <input
+        className="m-1"
+        type="text"
+        onChange={search}
+        placeholder="search by name"
+      />
 
       {myAlbum.length === 0 ? (
         <h3>Bạn chưa có albu, nào</h3>
       ) : (
         <>
-          <div className="row">
+          <div className="row mt-1">
             {myAlbum.map((e, i) => (
-              <AlbumItem e={e} setSelect={setSelect} key={i} />
+              <AlbumItem e={e} setSelect={setSelect} key={i} controll />
             ))}
           </div>
         </>
@@ -141,7 +170,7 @@ const MyAlbum = () => {
         aria-labelledby="exampleModalLabel"
         aria-hidden="true"
       >
-        <div className="modal-dialog">
+        <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="exampleModalLabel">
@@ -192,7 +221,7 @@ const MyAlbum = () => {
         tabIndex="-1"
         aria-hidden="true"
       >
-        <div className="modal-dialog">
+        <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">Edit image</h5>
@@ -241,7 +270,7 @@ const MyAlbum = () => {
         tabIndex="-1"
         aria-hidden="true"
       >
-        <div className="modal-dialog">
+        <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">Delete image</h5>
@@ -284,7 +313,7 @@ const MyAlbum = () => {
         tabIndex="-1"
         aria-hidden="true"
       >
-        <div className="modal-dialog">
+        <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">Shảe image</h5>
@@ -301,7 +330,11 @@ const MyAlbum = () => {
                 type="text"
                 onChange={(e) => setShareAlbumTo(e.target.value)}
               />
-              <div className="btn btn-primary ms-1" onClick={shareAlbum}>
+              <div
+                className="btn btn-primary ms-1"
+                data-bs-dismiss="modal"
+                onClick={shareAlbum}
+              >
                 share
               </div>
               <br /> This Album has been shared with {select?.sharedTo?.length}{" "}
@@ -377,4 +410,4 @@ const MyAlbum = () => {
     </div>
   );
 };
-export default MyAlbum
+export default MyAlbum;

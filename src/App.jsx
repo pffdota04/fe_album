@@ -15,6 +15,8 @@ import Album from "./pages/Album";
 import Image from "./pages/Image";
 import { get } from "./axiosCall";
 import LandingPage from "./pages/LandingPage";
+import MyImage from "./pages/MyImage";
+import SharedToMe from "./pages/SharedToMe";
 function App() {
   const userData = useContext(userContext);
   const [userEmail, setUserEmail] = useState(null);
@@ -62,8 +64,10 @@ function App() {
                 <Route path="*" element={<ErrorPage error={404} />} />
                 <Route path="/" element={<HomePage userEmail={userData} />} />
                 <Route path="/user" element={<UserPage />} />
+                <Route path="/myimage" element={<MyImage />} />
                 <Route path="/myalbum" element={<MyAlbum />} />
                 <Route path="/album/:id" element={<Album />} />
+                <Route path="/sharedtome" element={<SharedToMe />} />
                 <Route path="/image/:id" element={<Image />} />
                 <Route path="/404" element={<ErrorPage error={404} />} />
               </Routes>

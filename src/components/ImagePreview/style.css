@@ -3,9 +3,7 @@
   height: 100%;
   background-color: rgba(0, 0, 0, 0.6);
 }
-.item-img-action {
-  /* flex: 1; */
-}
+
 .item-img-action:hover {
   transform: scale(1.5);
 }
@@ -13,4 +11,11 @@
 .img-preview {
   border: 3px rgb(0, 0, 0) solid;
   box-shadow: -6px 6px rgb(100, 100, 100);
+}
+
+.height-width {
+  position: absolute;
+  bottom: 5px;
+  left: 10px;
+  text-shadow: -1px 3px 2px #000000
 }

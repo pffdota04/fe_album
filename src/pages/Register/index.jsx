@@ -82,7 +82,7 @@ const Register = () => {
               htmlFor="exampleInputEmail1"
               className="form-label text-light"
             >
-              Email address
+              Email
             </label>
             <input
               type="email"
