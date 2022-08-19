@@ -11,7 +11,21 @@ function ImagePreview({ e, setSelect, isOwner = false }) {
   const leaveHover = () => {
     setHover(false);
   };
+  function getFormattedDate(date) {
+    date = new Date(date);
+    var year = date.getFullYear();
 
+    var month = (1 + date.getMonth()).toString();
+    month = month.length > 1 ? month : "0" + month;
+
+    var day = date.getDate().toString();
+    day = day.length > 1 ? day : "0" + day;
+
+    var hours = date.getHours().toString();
+    var min = date.getMinutes().toString();
+
+    return hours + ":" + min + " " + month + "/" + day + "/" + year;
+  }
   return (
     <div
       className="position-relative d-inline-block m-3 "
@@ -23,9 +37,11 @@ function ImagePreview({ e, setSelect, isOwner = false }) {
           "hover-img position-absolute " + (hover ? "d-block" : "d-none")
         }
       >
-        <div className="p-3 w-100 h-100 d-flex flex-wrap justify-content-center align-items-center">
+        <div className="p-3 w-100 h-100 d-flex flex-wrap justify-content-center align-items-center noselect">
           <div className="text-light w-100 text-center">
             <strong>{e.name}</strong>
+            <br />
+            <strong>{getFormattedDate(e.uploadDay)}</strong>
             <br />
           </div>{" "}
           <Link
@@ -87,7 +103,7 @@ function ImagePreview({ e, setSelect, isOwner = false }) {
           )}
         </div>
       </div>
-      <div className="height-width text-light fw-bolder ">
+      <div className="height-width text-light fw-bolder noselect">
         {e.height}x{e.width}
       </div>
       <img

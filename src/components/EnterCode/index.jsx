@@ -20,14 +20,15 @@ function EnterCode(props) {
       {code.map((el, i) => (
         <input
           type="number"
-          // onChange={(e) => change(e, i)}
           min="0"
           max="9"
           value={el}
           id={"inp" + i}
-          className="m-1 input-code"
+          className="m-1 input-code no-spin"
           onKeyDown={(e) => onEnter(e, i)}
           onFocus={(e) => e.target.select()}
+          key={i}
+          onChange={() => {}}
         />
       ))}
     </div>

@@ -66,7 +66,6 @@ const LoginPage = () => {
             <label
               htmlFor="exampleInputPassword1"
               className="form-label text-light"
-              o
             >
               Password
             </label>
@@ -84,7 +83,6 @@ const LoginPage = () => {
             <label
               htmlFor="exampleInputPassword1"
               className="form-label text-light"
-              o
             >
               2FA CODE
             </label>

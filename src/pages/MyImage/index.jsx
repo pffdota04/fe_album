@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import "./style.css";
 import { useNavigate, useParams } from "react-router-dom";
 import userContext from "../../context/userContext";
@@ -6,6 +6,7 @@ import { get, post, put, remove } from "../../axiosCall";
 import ImagePreview from "../../components/ImagePreview";
 import axios from "axios";
 import Loading from "../../components/Loading";
+import { start } from "@popperjs/core";
 
 const MyImage = (props) => {
   const userData = useContext(userContext);
@@ -15,20 +16,20 @@ const MyImage = (props) => {
   const [listShared, setListShared] = useState([]);
   const [newName, setNewName] = useState("");
   const [listOrigin, setListOrigin] = useState([]); // list goc tu api
+  const [startAt, setStartAt] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     if (userData.state._id) fetchAgain();
   }, [userData]);
 
   const fetchAgain = () => {
-    console.log("FETCH AGAIN");
     get("/image/myimage").then((res) => {
       if (res.data !== "empty") {
         setListImages(res.data);
         setListOrigin(res.data);
       } else {
         alert("Không có ảnh nào");
-        // navitive("/404");
       }
     });
   };
@@ -88,14 +89,35 @@ const MyImage = (props) => {
       .catch((e) => console.error(e));
   };
 
+  const handleScroll = (e) => {
+    const { offsetHeight, scrollTop, scrollHeight } = e.target;
+    if (hasMore)
+      if (offsetHeight + scrollTop === scrollHeight) {
+        setStartAt((prev) => prev + 5);
+        fetchMore(startAt + 5);
+      }
+  };
+
+  const fetchMore = (at) => {
+    get("/image/myimage?startAt=" + at).then((res) => {
+      if (res.data !== "empty") {
+        setListImages((prev) => [...prev, ...res.data]);
+        setListOrigin((prev) => [...prev, ...res.data]);
+        if (res.data.length < 5) setHasMore(false);
+      } else {
+        setHasMore(false);
+      }
+    });
+  };
+
   return (
     <>
       {myImage !== null ? (
-        <div className="container">
+        <div>
           <h1>My Image</h1>
 
           <input type="text" onChange={search} placeholder="search by name" />
-          <div className="text-center">
+          <div className="text-center my-image" onScroll={handleScroll}>
             {myImage.map((e, i) => (
               <ImagePreview e={e} setSelect={setNowSelect} isOwner />
             ))}
