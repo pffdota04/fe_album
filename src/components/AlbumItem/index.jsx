@@ -17,8 +17,8 @@ const AlbumItem = ({ e, setSelect, controll = false }) => {
   return (
     <>
       {" "}
-      <div className="col-12 col-sm-6 col-md-4 col-lg-3">
-        <div className="card  ">
+      <div className="col-12 col-sm-6 col-md-4 col-lg-3 mb-3 ">
+        <div className="card  border border-primary">
           <div className="card-header bg-warning  ">
             Last update {getFormattedDate(e.lastUpdate)}
           </div>

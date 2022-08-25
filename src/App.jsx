@@ -4,6 +4,7 @@ import ErrorPage from "./pages/ErrorPage";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import UserPage from "./pages/UserPage";
 import ScanPage from "./pages/ScanPage";
 import Register from "./pages/Register";
@@ -57,7 +58,7 @@ function App() {
     <BrowserRouter>
       <Header checkToken={userEmail} />
       <>
-        <main className="main container">
+        <main className="main container p-3">
           {userEmail !== null &&
             (userEmail ? (
               <Routes>
@@ -87,6 +88,7 @@ function App() {
             ))}
         </main>
       </>
+      <Footer />
     </BrowserRouter>
   );
 }

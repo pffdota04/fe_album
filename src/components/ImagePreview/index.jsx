@@ -2,7 +2,7 @@ import "./style.css";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 
-function ImagePreview({ e, setSelect, isOwner = false }) {
+function ImagePreview({ e, setSelect, isOwner = false, isLoading = false }) {
   const [hover, setHover] = useState(false);
   const onHover = () => {
     setHover(true);
@@ -32,6 +32,7 @@ function ImagePreview({ e, setSelect, isOwner = false }) {
       onMouseOver={() => onHover()}
       onMouseOut={() => leaveHover()}
     >
+      {isLoading && <div className="spinner-border" role="status"></div>}
       <div
         className={
           "hover-img position-absolute " + (hover ? "d-block" : "d-none")
@@ -44,34 +45,59 @@ function ImagePreview({ e, setSelect, isOwner = false }) {
             <strong>{getFormattedDate(e.uploadDay)}</strong>
             <br />
           </div>{" "}
-          <Link
-            to={"/image/" + e._id}
-            className="item-img-action p-1"
-            target={"_blank"}
-          >
-            <span data-bs-toggle="tooltip" data-bs-placement="top" title="View">
-              👁
-            </span>
-          </Link>
-          {isOwner && (
-            <>
-              <div
-                className="item-img-action text-center noselect cursor-pointer p-1"
-                data-bs-toggle="modal"
-                data-bs-target="#editImg"
-                onClick={() => setSelect(e)}
+          {e.status == "complete" && (
+            <Link
+              to={"/image/" + e._id}
+              className="item-img-action p-1"
+              target={"_blank"}
+            >
+              <span
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                title="View"
               >
-                <span
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="top"
-                  title="Edit"
-                  onClick={() => setSelect(e)}
-                >
-                  🖊
-                </span>
-              </div>
+                👁
+              </span>
+            </Link>
+          )}
+          {isOwner && e.status !== "init" && (
+            <>
+              {e.status !== "error" && (
+                <>
+                  <div
+                    className="item-img-action text-center noselect cursor-pointer p-1"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editImg"
+                    onClick={() => setSelect(e)}
+                  >
+                    <span
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      title="Edit"
+                      onClick={() => setSelect(e)}
+                    >
+                      🖊
+                    </span>
+                  </div>
+
+                  <div
+                    className="item-img-action text-center noselect cursor-pointer p-1"
+                    data-bs-toggle="modal"
+                    data-bs-target="#shareImg"
+                  >
+                    <span
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      title="Share"
+                      onClick={() => setSelect(e)}
+                    >
+                      🔗
+                    </span>
+                  </div>
+                </>
+              )}
               <div
-                className="item-img-action text-center noselect cursor-pointer p-1"
+                className="item-img-action text-center noselect cursor-pointer p-1 z-999"
                 data-bs-toggle="modal"
                 data-bs-target="#deleteImg"
                 onClick={() => setSelect(e)}
@@ -80,23 +106,8 @@ function ImagePreview({ e, setSelect, isOwner = false }) {
                   data-bs-toggle="tooltip"
                   data-bs-placement="top"
                   title="Delete"
-                  onClick={() => setSelect(e)}
                 >
                   🗑
-                </span>
-              </div>
-              <div
-                className="item-img-action text-center noselect cursor-pointer p-1"
-                data-bs-toggle="modal"
-                data-bs-target="#shareImg"
-              >
-                <span
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="top"
-                  title="Share"
-                  onClick={() => setSelect(e)}
-                >
-                  🔗
                 </span>
               </div>
             </>
@@ -106,14 +117,35 @@ function ImagePreview({ e, setSelect, isOwner = false }) {
       <div className="height-width text-light fw-bolder noselect">
         {e.height}x{e.width}
       </div>
-      <img
-        src={"http://localhost:5000/image/getcustom/?file=" + e._id + ".png"}
-        loading="lazy"
-        style={{ maxWidth: "350px", objectFit: "cover" }}
-        height="200"
-        alt="dsfrefsdgdseg"
-        className="img-preview rounded rounded-3"
-      />
+
+      {e.status !== "complete" ? (
+        <>
+          <div
+            className="img-preview rounded rounded-3"
+            style={{ width: "300px", height: "200px" }}
+          ></div>
+          <div className="on-hover-perview-upload ">
+            <div className="d-flex justify-content-center h-100 align-items-center">
+              {e.status == "init" ? (
+                <div className="spinner-border" role="status"></div>
+              ) : (
+                <>
+                  <div className="">❗</div>
+                </>
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        <img
+          src={"http://localhost:5000/image/getcustom/?file=" + e._id + ".png"}
+          loading="lazy"
+          style={{ minWidth: "200px", objectFit: "cover" }}
+          height="200"
+          alt="dsfrefsdgdseg"
+          className="img-preview rounded rounded-3 d-block  "
+        />
+      )}
     </div>
   );
 }

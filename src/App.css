@@ -1,17 +1,29 @@
 .App {
   text-align: center;
 }
+/*  */
+
+#root {
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+}
+footer {
+  margin-top: auto !important;
+}
 
 .main {
   top: 54px;
+  margin-bottom: 54px;
   position: relative;
+  /* min-height: calc(100vh - 54px); */
 }
 
 .cursor-pointer {
   cursor: pointer;
 }
 
-.opacity-half{
+.opacity-half {
   opacity: 0.5;
 }
 
@@ -25,6 +37,13 @@
   overflow: hidden;
 }
 
+.z-999 {
+  z-index: 999;
+}
+
+.relative {
+  position: relative;
+}
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none; /* Safari */

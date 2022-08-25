@@ -25,8 +25,7 @@ const Album = (props) => {
   const [uploadPerTotal, setUploadPerTotal] = useState("...");
   const [imgPreUploads, setImgPreUploads] = useState([]);
   const [newNameMulti, setNewNameMulti] = useState([]);
-  const [progress, setProgress] = useState([]);
-  const [uploadStatus, setUploadStatus] = useState("NO"); // NO -> SELECTED -> UPLOAD -> PROGRESS -> COMPLETE
+  // init >> progress >> complete
 
   const navitive = useNavigate();
   useEffect(() => {
@@ -37,6 +36,11 @@ const Album = (props) => {
           get("/user/byid/" + res.data.uid).then((res2) => setOnwer(res2.data));
           get("/image/albumid/" + id).then((res3) => {
             const dataRever = res3.data.reverse();
+            const listInit = [];
+            dataRever.map((e) => {
+              if (e.status == "init") listInit.push(e);
+            });
+            if (listInit.length > 0) checkProgress(listInit, dataRever);
             setListImages(dataRever);
             setListOrigin(dataRever);
           });
@@ -47,6 +51,10 @@ const Album = (props) => {
       });
     }
   }, [userData]);
+
+  useEffect(() => {
+    setListImages(listOrigin);
+  }, [listOrigin]);
 
   // click to show modal in image
   useEffect(() => {
@@ -82,16 +90,12 @@ const Album = (props) => {
   // after choose file (and RESELECT)
   useEffect(() => {
     if (selectedMultiFile.length > 0) {
-      setUploadStatus("SELECTED");
-
       // reset count
       setUploadPercentage(false);
-
       // remove url before
       for (let i = 0; i < imgPreUploads.length; i++) {
         URL.revokeObjectURL(imgPreUploads[i]);
       }
-
       //create new url
       const listURL = [];
       for (let i = 0; i < selectedMultiFile.length; i++) {
@@ -103,19 +107,17 @@ const Album = (props) => {
     }
   }, [selectedMultiFile]);
 
-  // upload img with name, file and albumid
   const handleUploadMultiple = async (event) => {
     event.preventDefault();
     const formData = new FormData();
     formData.append("albumId", myAlbum?._id);
     formData.append("uploadkey", (Math.random() + 1).toString(36).substring(2));
-    formData.append("name", JSON.stringify(newNameMulti));
-    for (let i = 0; i < selectedMultiFile.length; i++) {
-      formData.append("imgs", selectedMultiFile[i]);
+    formData.append("name", JSON.stringify(newNameMulti.reverse()));
+    const a = [...selectedMultiFile].reverse();
+    for (let i = 0; i < a.length; i++) {
+      formData.append("imgs", a[i]);
     }
     try {
-      setUploadStatus("UPLOAD");
-
       axios({
         headers: {
           "Content-Type": "multipart/form-data",
@@ -131,7 +133,7 @@ const Album = (props) => {
           const loadedSizeInMB = loaded / 1000000;
           const uploadPercentage = (loadedSizeInMB / totalSizeInMB) * 100;
           const percen = Math.round(uploadPercentage);
-          if (percen === 100) setUploadPercentage("Đang xử lý...");
+          if (percen === 100) setUploadPercentage(true);
           else setUploadPercentage(percen + "%");
           setUploadPerTotal(
             loadedSizeInMB.toFixed(1) + "MB/" + totalSizeInMB.toFixed(1) + "MB"
@@ -140,17 +142,13 @@ const Album = (props) => {
         encType: "multipart/form-data",
       })
         .then((res) => {
-          if (res.data.status) {
-            setUploadStatus("PROGRESS");
-            setUploadPercentage("Xong!");
-            checkProgress(res.data.key);
-          } else {
-            setUploadStatus("COMPLETE");
-            setUploadPercentage("Error!");
-            alert(res.data.message);
-          }
+          setImgPreUploads([]);
+          setSelectedMultiFile([]);
+          const a = res.data.reverse();
+          checkProgress(a, [...a, ...listOrigin]);
+          setListOrigin((prev) => [...a, ...prev]);
         })
-        .catch((e) => setUploadPercentage("Xong!"));
+        .catch((e) => setUploadPercentage(true));
       fetchAgain();
     } catch (error) {
       console.log(error);
@@ -158,19 +156,32 @@ const Album = (props) => {
   };
 
   // call to check progrss. End when API return false
-  const checkProgress = (key) => {
-    console.log(progress);
-    get("/image/check?key=" + key).then((res) => {
-      setProgress(res.data);
-      if (res.data !== true)
+  const checkProgress = (list, originlist) => {
+    post("/image/check", { list: list.map((a) => a._id) }).then((res) => {
+      const { list, complete } = res.data;
+      const newori = [...originlist];
+      if (!complete)
         setTimeout(() => {
-          checkProgress(key);
-        }, 500);
+          let listInit = [];
+          console.log("----");
+
+          list.map((e) => {
+            console.log(e.status);
+            if (e.status == "init") listInit.push(e);
+            else {
+              let foundIndex = originlist.findIndex((x) => x._id == e._id);
+              newori[foundIndex] = e;
+              setListOrigin(newori);
+            }
+          });
+          checkProgress(listInit, newori);
+        }, 300);
       else {
-        // progress completed
-        clearSelectUpload();
-        fetchAgain();
-        setUploadStatus("NO");
+        list.map((e) => {
+          let foundIndex = originlist.findIndex((x) => x._id == e._id);
+          newori[foundIndex] = e;
+          setListOrigin(newori);
+        });
       }
     });
   };
@@ -193,13 +204,15 @@ const Album = (props) => {
   };
 
   const shareImage = async () => {
-    alert("??");
     try {
-      const share = await post("/image/share", {
+      const shared = await post("/image/share", {
         _id: nowSelect._id,
         email: emailShare,
       });
-      console.log(share);
+      if (shared.data == "ok") fetchAgain();
+      else {
+        alert(shared.data.message);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -220,7 +233,6 @@ const Album = (props) => {
   };
 
   const clearSelectUpload = () => {
-    setProgress([]);
     setUploadPerTotal("...");
     setImgPreUploads([]);
     setNewNameMulti([]);
@@ -228,7 +240,6 @@ const Album = (props) => {
   };
 
   let timeout = 0;
-
   const search = (e) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => {
@@ -259,6 +270,8 @@ const Album = (props) => {
             <h5 className="card-header">
               Last update: {getFormattedDate(myAlbum?.lastUpdate)}
             </h5>
+            {/* <p>{JSON.stringify(nowSelect)}</p> */}
+            {/* <p>{listOrigin.length}</p> */}
             <div className="card-body">
               <h5 className="card-title"> {myAlbum?.name}</h5>
               <p className="card-text">
@@ -292,37 +305,16 @@ const Album = (props) => {
                         <div className="m-3 " key={i}>
                           <div className="image-upload-preview text-center pb-3">
                             <img src={e} height="100" className="" />
-                            {uploadStatus === "PROGRESS" ? (
-                              <div className="on-hover-perview-upload ">
-                                <div className="d-flex justify-content-center h-100 align-items-center">
-                                  {progress[i] ? (
-                                    <span className="text-danger cursor-pointer  display-6 ">
-                                      ✔
-                                    </span>
-                                  ) : progress[i] === false ? (
-                                    <span className="text-danger cursor-pointer  display-6 ">
-                                      ⚠
-                                    </span>
-                                  ) : (
-                                    <div
-                                      className="spinner-border"
-                                      role="status"
-                                    ></div>
-                                  )}
-                                </div>
+                            <div className="remove-image-upload-preview ">
+                              <div className="d-flex justify-content-center h-100 align-items-center">
+                                <span
+                                  className="text-danger cursor-pointer  "
+                                  onClick={() => removeAnUpload(i)}
+                                >
+                                  ❌
+                                </span>
                               </div>
-                            ) : (
-                              <div className="remove-image-upload-preview ">
-                                <div className="d-flex justify-content-center h-100 align-items-center">
-                                  <span
-                                    className="text-danger cursor-pointer  "
-                                    onClick={() => removeAnUpload(i)}
-                                  >
-                                    ❌
-                                  </span>
-                                </div>
-                              </div>
-                            )}
+                            </div>
                           </div>
                           <input
                             type="text"
@@ -337,7 +329,7 @@ const Album = (props) => {
                         </div>
                       ))}
                     </div>
-                    {uploadStatus !== "PROGRESS" && (
+                    {imgPreUploads.length > 0 !== "PROGRESS" && (
                       <button
                         className="btn btn-warning"
                         disabled={newNameMulti.includes("")}
@@ -365,9 +357,20 @@ const Album = (props) => {
             onChange={(event) => setSelectedMultiFile(event.target.files)}
           />
 
+          {/* 
           {/* MAP ITEM */}
           <div className="d-flex flex-wrap justify-content-center">
             {/* {JSON.stringify(listImages)} */}
+            {/* {progressList.length > 0 &&
+              progressList.map((e) => (
+                <ImagePreview
+                  e={e}
+                  key={e._id}
+                  setSelect={setNowSelect}
+                  isOwner={myAlbum.uid === userData.state._id}
+                  isLoading={true}
+                />
+              ))} */}
             {listImages.length > 0 ? (
               listImages.map((e) => (
                 <ImagePreview
@@ -394,13 +397,12 @@ const Album = (props) => {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-body">
-                  <h1>{uploadpercen}</h1>
+                  <h1>{uploadpercen === true ? "Xong" : uploadpercen}</h1>
                   <h6>{uploadPerTotal}</h6>
                   {/* Progress: {JSON.stringify(progress)} */}
                 </div>
                 <div className="modal-footer">
-                  {(uploadStatus === "PROGRESS" ||
-                  uploadStatus === "COMPLETE" || uploadStatus === "NO" ) ? (
+                  {uploadpercen === true ? (
                     <button
                       type="button"
                       className="btn btn-secondary"
@@ -514,9 +516,7 @@ const Album = (props) => {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">
-                    Share Image {nowSelect?.name}x
-                  </h5>
+                  <h5 className="modal-title">Share Image {nowSelect?.name}</h5>
                   <button
                     type="button"
                     className="btn-close"
@@ -530,8 +530,12 @@ const Album = (props) => {
                     type="text"
                     onChange={(e) => setEmailShare(e.target.value)}
                   />
-                  <div className="btn btn-primary ms-1" onClick={shareImage}>
-                    sharex
+                  <div
+                    className="btn btn-primary ms-1"
+                    data-bs-dismiss="modal"
+                    onClick={shareImage}
+                  >
+                    share
                   </div>
                   <br /> This image has been shared with{" "}
                   {nowSelect?.sharedTo.length} people.

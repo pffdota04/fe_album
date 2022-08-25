@@ -30,11 +30,16 @@ function Header({ checkToken }) {
 
         {checkToken !== null &&
           (checkToken ? (
-            <form className="form-inline">
-              <div onClick={() => logout()} className="btn btn-danger me-3  ">
-                Logout
-              </div>
-            </form>
+            <>
+              <form className="form-inline">
+                <Link to='/user' className="d-inline-block text-danger text-decoration-underline me-2">
+                  {userData.state.name}
+                </Link>
+                <div onClick={() => logout()} className="btn btn-danger me-3  ">
+                  Logout
+                </div>
+              </form>
+            </>
           ) : (
             <form className="form-inline">
               <Link to="login" className="btn btn-warning me-3">

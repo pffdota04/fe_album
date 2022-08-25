@@ -1,4 +1,6 @@
 // import { Link } from "react-router-dom";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./style.css";
 
@@ -15,23 +17,6 @@ const LandingPage = (props) => {
         <Link to="register" className="btn-sign-up btn btn-warning">
           SIGN-UP
         </Link>
-      </div>
-      <div className="footer-landing bg-dark">
-        <hr />
-        <hr />
-        <hr />
-        <hr />
-        <hr />
-        <hr />
-        <hr />
-        <hr />
-        <hr />
-        <hr />
-        <hr />
-        <hr />
-        <hr />
-        <hr />
-        <hr />
       </div>
     </div>
   );

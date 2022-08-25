@@ -7,6 +7,7 @@ import ImagePreview from "../../components/ImagePreview";
 import axios from "axios";
 import Loading from "../../components/Loading";
 import { start } from "@popperjs/core";
+import InfinityScroll from "../../components/InfinityScroll";
 
 const MyImage = (props) => {
   const userData = useContext(userContext);
@@ -18,6 +19,7 @@ const MyImage = (props) => {
   const [listOrigin, setListOrigin] = useState([]); // list goc tu api
   const [startAt, setStartAt] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [pauseFetct, setPauseFetct] = useState(false);
 
   useEffect(() => {
     if (userData.state._id) fetchAgain();
@@ -63,13 +65,17 @@ const MyImage = (props) => {
   const search = (e) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => {
-      if (e.target.value == "") setListImages(listOrigin);
-      else
+      if (e.target.value == "") {
+        setListImages(listOrigin);
+        setPauseFetct(false);
+      } else {
         setListImages(
           listOrigin.filter((a) => {
-            return a.name.includes(e.target.value.toLowerCase());
+            return a.name.toLowerCase().includes(e.target.value.toLowerCase());
           })
         );
+        setPauseFetct(true);
+      }
     }, 1000);
   };
 
@@ -89,39 +95,34 @@ const MyImage = (props) => {
       .catch((e) => console.error(e));
   };
 
-  const handleScroll = (e) => {
-    const { offsetHeight, scrollTop, scrollHeight } = e.target;
-    if (hasMore)
-      if (offsetHeight + scrollTop === scrollHeight) {
-        setStartAt((prev) => prev + 5);
-        fetchMore(startAt + 5);
-      }
-  };
-
-  const fetchMore = (at) => {
-    get("/image/myimage?startAt=" + at).then((res) => {
-      if (res.data !== "empty") {
-        setListImages((prev) => [...prev, ...res.data]);
-        setListOrigin((prev) => [...prev, ...res.data]);
-        if (res.data.length < 5) setHasMore(false);
-      } else {
-        setHasMore(false);
-      }
-    });
+  const fetchMore = async (at) => {
+    const data = await get("/image/myimage?startAt=" + at);
+    if (data.data !== "empty") {
+      setListImages((prev) => [...prev, ...data.data]);
+      setListOrigin((prev) => [...prev, ...data.data]);
+      if (data.data.length < 5) setHasMore(false);
+    } else {
+      setHasMore(false);
+    }
   };
 
   return (
     <>
       {myImage !== null ? (
         <div>
-          <h1>My Image</h1>
-
+          <h1>My Image </h1>
           <input type="text" onChange={search} placeholder="search by name" />
-          <div className="text-center my-image" onScroll={handleScroll}>
+          <InfinityScroll
+            height="400px"
+            fetchData={fetchMore}
+            step={5}
+            hasMore={hasMore}
+            pauseFetch={pauseFetct}
+          >
             {myImage.map((e, i) => (
               <ImagePreview e={e} setSelect={setNowSelect} isOwner />
             ))}
-          </div>
+          </InfinityScroll>
           {/* MODAL */}
           {/* Modal delete img */}
           <div
@@ -141,6 +142,7 @@ const MyImage = (props) => {
                     aria-label="Close"
                   ></button>
                 </div>
+
                 <div className="modal-body">Are yoy sure? </div>
                 <div className="modal-footer">
                   <button

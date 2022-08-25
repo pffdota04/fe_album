@@ -11,7 +11,7 @@ import {
 import userContext from "../../context/userContext";
 import axios from "axios";
 import OpenSeaDragonViewer from "./../../components/OpenSeaDragonViewer/OpenSeaViewer";
-import { get } from "../../axiosCall";
+import { get, remove } from "../../axiosCall";
 import Loading from "../../components/Loading";
 // import { parseString } from "xml2js";
 const Image = (props) => {
@@ -50,6 +50,14 @@ const Image = (props) => {
     return month + "/" + day + "/" + year;
   }
 
+  const delteAlbum = () => {
+    remove("/image?_id=" + image._id)
+      .then(() => window.location.reload())
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
   return (
     <div className="container ">
       {!image ? (
@@ -59,7 +67,13 @@ const Image = (props) => {
           <h1>Image name: {image.name}</h1>
           <h6>Upload day: {getFormattedDate(image.uploadDay)}</h6>
           {/* {JSON.stringify(image)} */}
-          {isOwner ? <div className="btn btn-danger">Remove this img</div> : ""}
+          {isOwner && (
+            <>
+              <div className="btn btn-danger" onClick={delteAlbum}>
+                Remove this img
+              </div>
+            </>
+          )}
           <hr />
           <div className="p-3">
             {image.status ? (
