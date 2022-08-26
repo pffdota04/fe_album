@@ -37,19 +37,11 @@ const OpenSeaDragonViewer = ({ image }) => {
   return (
     <>
       ({image.source.Image.Size.Height} x {image.source.Image.Size.Width})
-      <span
-        id="zoom-in"
-        title="Zoom in"
-        className="text-danger cursor-pointer noselect"
-      >
-        Zoom In
+      <span id="zoom-in" title="Zoom in" className="m-1 btn btn-danger">
+        Zoom In ➕
       </span>
-      <span
-        id="zoom-out"
-        title="Zoom out"
-        className="text-danger cursor-pointer noselect"
-      >
-        Zoom out
+      <span id="zoom-out" title="Zoom out" className="m-1 btn btn-danger">
+        Zoom out ➖
       </span>
       <div
         id="openSeaDragon"

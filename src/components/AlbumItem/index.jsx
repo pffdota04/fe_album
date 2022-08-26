@@ -23,7 +23,7 @@ const AlbumItem = ({ e, setSelect, controll = false }) => {
             Last update {getFormattedDate(e.lastUpdate)}
           </div>
           <div className="card-body">
-            <h5 className="card-title">{e.name}</h5>
+            <h5 className="card-title three-dot">{e.name}</h5>
             <p className="card-text">
               Tolal img: {e.totalImage}
               <br />
